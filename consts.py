@@ -1,0 +1,3 @@
+LOGIN = ''
+PASSWORD = ''
+ENABLE_PASSWORD = ''

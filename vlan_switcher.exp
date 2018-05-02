@@ -1,0 +1,44 @@
+#!/usr/bin/expect --
+	
+set login [lindex $argv 0];
+set pass [lindex $argv 1 ];
+set ena_pass [lindex $argv 2];
+#set ip[exec echo [lindex $argv 3]];
+#set command [lindex $argv 4];
+set ip [lindex $argv 3]
+set list [lindex $argv 4];
+set vlan [lindex $argv 5];
+#exp_internal 1
+spawn telnet $ip
+expect -re "(\[Uu\]sername|login|(User Name))\ *:" {
+	send "$login\r";
+	expect -re "\[Pp\]assword\ *:" {
+		send "$pass\r";
+		expect -re "^(.*)>|#$" {send "enable\r"}
+		expect -re "\[Pp\]assword:" {send "$ena_pass\r"}
+	}
+	# custom code by kolas
+
+	expect -re "\^(.*)#$" {send "conf t\r";
+	foreach a $list {
+		expect -re "\^(.*)#$" {send "int fa $a\r";
+			expect -re "\^(.*)#$" {send "switchport access vlan $vlan\r";
+					expect -re "\^(.*)#$" {send "exit\r";
+							}
+						
+					}        
+				}
+			}	 
+		expect -re "\^(.*)#$" {send "exit\r"}
+
+		expect -re "\^(.*)#$" {send "copy r s\r\r"
+
+			#expect "Destination filename [startup-config]?" {send "\r"}
+			}
+		expect -re "\^(.*)#$" {send "exit\r"}
+		
+		}
+	expect -re "\^(.*)#$" {send "exit\r"}
+		
+	}
+
